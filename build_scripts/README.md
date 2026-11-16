@@ -11,7 +11,7 @@ The configured checkout must support custom VPN profiles and the retained Window
 host MTA lifetime. A local commit is not available to CI until published upstream.
 Xray-core remains supplied by libXray's Go module.
 
-Install Python 3.12+, `uv`, Flutter/Dart, Go and LLVM/libclang on `PATH`.
+Install Python 3.12+, `uv`, a Flutter/Dart SDK satisfying `pubspec.yaml` (validated by `build.sh` before building), Go and LLVM/libclang on `PATH`.
 Platform tools and CI versions are defined in the [Build workflow](../.github/workflows/build.yml):
 
 | Target | Additional requirements |

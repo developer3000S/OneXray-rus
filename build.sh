@@ -48,8 +48,46 @@ if ! command -v flutter &>/dev/null; then
     exit 1
 fi
 
-echo "==> Flutter doctor"
-flutter doctor
+# --- Version requirements from pubspec.yaml ---
+REQUIRED_FLUTTER="3.50.0"
+REQUIRED_DART="3.14.0"
+
+version_ge() {
+    # returns 0 if $1 >= $2 (semver, numeric components)
+    local a="$1" b="$2"
+    local IFS=.
+    read -ra aa <<< "$a"
+    read -ra bb <<< "$b"
+    local i
+    for i in 0 1 2; do
+        local x="${aa[i]:-0}" y="${bb[i]:-0}"
+        if (( 10#$x > 10#$y )); then return 0; fi
+        if (( 10#$x < 10#$y )); then return 1; fi
+    done
+    return 0
+}
+
+echo "==> Flutter version check"
+FLUTTER_VERSION="$(flutter --version 2>/dev/null | sed -n 's/.*Flutter \([0-9][^ ]*\).*/\1/p' | head -1)"
+DART_VERSION="$(flutter --version 2>/dev/null | sed -n 's/.*Dart \([0-9][^ ]*\).*/\1/p' | head -1)"
+
+echo "  Flutter: ${FLUTTER_VERSION:-unknown} (need >= ${REQUIRED_FLUTTER})"
+echo "  Dart:    ${DART_VERSION:-unknown} (need >= ${REQUIRED_DART})"
+
+if [[ -n "${FLUTTER_VERSION:-}" ]] && ! version_ge "$FLUTTER_VERSION" "$REQUIRED_FLUTTER"; then
+    echo "ERROR: Flutter $FLUTTER_VERSION is too old; pubspec.yaml requires >= $REQUIRED_FLUTTER" >&2
+    echo "  Upgrade Flutter: flutter upgrade" >&2
+    exit 1
+fi
+
+if [[ -n "${DART_VERSION:-}" ]] && ! version_ge "$DART_VERSION" "$REQUIRED_DART"; then
+    echo "ERROR: Dart SDK $DART_VERSION is too old; pubspec.yaml requires >= $REQUIRED_DART" >&2
+    echo "  Upgrade Flutter: flutter upgrade" >&2
+    exit 1
+fi
+
+echo "==> Flutter doctor (informational)"
+flutter doctor || true
 
 echo "==> flutter pub get"
 flutter pub get

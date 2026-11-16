@@ -79,6 +79,7 @@ android/app/key.properties
 **/fastlane/metadata/
 
 # my ignore
+lib/gen/
 /assets/dat
 /android/app/libs
 *.xcframework
