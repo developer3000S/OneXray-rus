@@ -100,16 +100,8 @@ dart run tool/ffigen.dart
 build_windows() {
     local mode_flag=""
     [[ "$BUILD_MODE" == "release" ]] && mode_flag="--release"
-    local arch_flag=""
-    if [[ -n "$BUILD_ARCH" ]]; then
-        case "$BUILD_ARCH" in
-            amd64|x64) arch_flag="--target-platform windows_x64" ;;
-            arm64) arch_flag="--target-platform windows_arm64" ;;
-            *) echo "WARNING: unknown arch $BUILD_ARCH for windows, using host" ;;
-        esac
-    fi
-    echo "==> Building Windows ($BUILD_MODE $arch_flag)"
-    flutter build windows $mode_flag $arch_flag
+    echo "==> Building Windows ($BUILD_MODE)"
+    flutter build windows $mode_flag
 }
 
 build_linux() {
@@ -118,8 +110,8 @@ build_linux() {
     local arch_flag=""
     if [[ -n "$BUILD_ARCH" ]]; then
         case "$BUILD_ARCH" in
-            amd64|x64) arch_flag="--target-platform linux_x64" ;;
-            arm64|aarch64) arch_flag="--target-platform linux_arm64" ;;
+            amd64|x64) arch_flag="--target-platform linux-x64" ;;
+            arm64|aarch64) arch_flag="--target-platform linux-arm64" ;;
             *) echo "WARNING: unknown arch $BUILD_ARCH for linux, using host" ;;
         esac
     fi
