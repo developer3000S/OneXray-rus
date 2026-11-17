@@ -1618,7 +1618,7 @@ class BridgeFlutterApi(private val binaryMessenger: BinaryMessenger, private val
         }
       } else {
         callback(Result.failure(MessagesPigeonUtils.createConnectionError(channelName)))
-      }
+      } 
     }
   }
   fun vpnStatusChanged(statusArg: VpnStatus, callback: (Result<Unit>) -> Unit)
@@ -1635,7 +1635,7 @@ class BridgeFlutterApi(private val binaryMessenger: BinaryMessenger, private val
         }
       } else {
         callback(Result.failure(MessagesPigeonUtils.createConnectionError(channelName)))
-      }
+      } 
     }
   }
   fun openSettings(callback: (Result<Unit>) -> Unit)
@@ -1652,7 +1652,7 @@ class BridgeFlutterApi(private val binaryMessenger: BinaryMessenger, private val
         }
       } else {
         callback(Result.failure(MessagesPigeonUtils.createConnectionError(channelName)))
-      }
+      } 
     }
   }
 }
