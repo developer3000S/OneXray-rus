@@ -40,6 +40,14 @@ final class ConnectionPlatformRequirements {
     for (final value in await queryXrayOutboundInterfaceList()) value.name,
   };
 
+  static Future<String> _resolveGetcap() async {
+    final candidates = <String>['/usr/sbin/getcap', '/sbin/getcap', '/usr/bin/getcap'];
+    for (final candidate in candidates) {
+      if (await File(candidate).exists()) return candidate;
+    }
+    return 'getcap';
+  }
+
   Future<void> ensureOutboundInterface(
     String name, {
     bool proxyMode = false,
@@ -84,7 +92,8 @@ final class ConnectionPlatformRequirements {
     if (RegExp(r'^Uid:\s+0\s+0\s+0\s+0$', multiLine: true).hasMatch(status)) {
       return;
     }
-    final result = await Process.run('getcap', [
+    final getcap = await _resolveGetcap();
+    final result = await Process.run(getcap, [
       file.path,
     ]).timeout(const Duration(seconds: 5));
     final capabilities = '${result.stdout}';

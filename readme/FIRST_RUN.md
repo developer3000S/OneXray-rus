@@ -163,6 +163,7 @@ For example, for Debug:
 
 ```shell
 sudo setcap cap_net_admin,cap_net_raw+eip build/linux/x64/debug/bundle/OneXrayCore
+sudo setcap cap_net_admin,cap_net_raw+eip /home/user/soft/OneXray/OneXrayCore
 ```
 
 After a rebuild that replaces `OneXrayCore`, grant the capabilities again. On

@@ -117,6 +117,93 @@ build_linux() {
     fi
     echo "==> Building Linux ($BUILD_MODE $arch_flag)"
     flutter build linux $mode_flag $arch_flag
+    build_deb
+}
+
+build_deb() {
+    echo "==> Packaging Linux .deb"
+
+    # Deb architecture from the requested build arch
+    local deb_arch="amd64"
+    case "$BUILD_ARCH" in
+        amd64|x64) deb_arch="amd64" ;;
+        arm64|aarch64) deb_arch="arm64" ;;
+        *) deb_arch="$(dpkg --print-architecture 2>/dev/null || echo amd64)" ;;
+    esac
+
+    # Flutter linux output directory for the chosen arch/mode
+    local linux_arch_dir="x64"
+    case "$BUILD_ARCH" in
+        arm64|aarch64) linux_arch_dir="arm64" ;;
+    esac
+
+    local bundle_dir="$SCRIPT_DIR/build/linux/$linux_arch_dir/$BUILD_MODE/bundle"
+    if [[ ! -d "$bundle_dir" ]]; then
+        bundle_dir="$(find "$SCRIPT_DIR/build/linux" -maxdepth 3 -type d -name bundle 2>/dev/null | head -1)"
+    fi
+
+    local version_raw
+    version_raw="$(grep '^version:' "$SCRIPT_DIR/pubspec.yaml" | sed 's/.*version: *//' | cut -d'+' -f1)"
+    local deb_version="${version_raw:-0.0.0}-1"
+
+    local deb_root="$SCRIPT_DIR/build/linux/deb"
+    rm -rf "$deb_root"
+    mkdir -p "$deb_root/DEBIAN"
+    mkdir -p "$deb_root/opt/OneXray"
+    mkdir -p "$deb_root/usr/share/applications"
+    mkdir -p "$deb_root/usr/share/icons/hicolor/256x256/apps"
+    mkdir -p "$deb_root/usr/bin"
+
+    # App bundle -> /opt/OneXray
+    if [[ -d "$bundle_dir" ]]; then
+        cp -a "$bundle_dir/." "$deb_root/opt/OneXray/"
+    fi
+
+    # DEBIAN/control
+    cat > "$deb_root/DEBIAN/control" <<EOF
+Package: onexray
+Version: $deb_version
+Section: net
+Priority: optional
+Architecture: $deb_arch
+Maintainer: Yuan Dev LLC <yuan@yuandev.net>
+Depends: procps, libcap2-bin, libayatana-appindicator3-1
+Description: VPN and Proxy Client
+ OneXray is a cross-platform Xray-core client for managing servers and routing.
+EOF
+
+    # DEBIAN/postinst — grant VPN capabilities and expose OneXray in PATH
+    cat > "$deb_root/DEBIAN/postinst" <<'EOF'
+#!/bin/sh
+set -e
+setcap cap_net_admin,cap_net_raw+eip /opt/OneXray/OneXrayCore || true
+ln -sf /opt/OneXray/OneXray /usr/bin/OneXray
+EOF
+    chmod 0755 "$deb_root/DEBIAN/postinst"
+
+    # Desktop entry
+    cat > "$deb_root/usr/share/applications/onexray.desktop" <<EOF
+[Desktop Entry]
+Name=OneXray
+GenericName=VPN and Proxy Client
+Comment=Xray-core client for managing servers and routing
+Exec=/opt/OneXray/OneXray
+Icon=onexray
+Type=Application
+Categories=Network;VPN;
+StartupNotify=true
+StartupWMClass=OneXray
+MimeType=x-scheme-handler/onexray;
+EOF
+
+    # Application icon
+    if [[ -f "$SCRIPT_DIR/assets/logo.png" ]]; then
+        cp "$SCRIPT_DIR/assets/logo.png" "$deb_root/usr/share/icons/hicolor/256x256/apps/onexray.png"
+    fi
+
+    local deb_out="$SCRIPT_DIR/build/linux/onexray_${deb_version}_${deb_arch}.deb"
+    dpkg-deb --build --root-owner-group "$deb_root" "$deb_out"
+    echo "==> Debian package created: $deb_out"
 }
 
 build_macos() {
