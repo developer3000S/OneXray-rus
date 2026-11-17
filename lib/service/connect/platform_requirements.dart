@@ -92,7 +92,10 @@ final class ConnectionPlatformRequirements {
         !capabilities.contains('cap_net_admin') ||
         !capabilities.contains('cap_net_raw') ||
         !RegExp(r'=[eip]*e[eip]*\s*$').hasMatch(capabilities)) {
-      throw StateError('cap_net_admin / cap_net_raw are unavailable');
+      throw StateError(
+        'cap_net_admin / cap_net_raw are unavailable. '
+        'Run: sudo setcap cap_net_admin,cap_net_raw+eip ${file.path}',
+      );
     }
   }
 }

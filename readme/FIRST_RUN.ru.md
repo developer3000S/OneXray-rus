@@ -142,4 +142,31 @@ Apple/Android, поскольку общий Dart-код импортирует 
 подпись платформы для разработки — отдельное требование. Для упаковки используйте
 руководство сборки.
 
+## 5. Устранение неполадок
+
+### Linux: `cap_net_admin / cap_net_raw are unavailable`
+
+Ошибка появляется при старте VPN-сессии, если у `OneXrayCore` нет сетевых
+возможностей. Проверьте:
+
+```shell
+getcap <путь к OneXrayCore>
+```
+
+Если вывода нет или capabilities не равны
+`cap_net_admin,cap_net_raw+eip`, выдайте их:
+
+```shell
+sudo setcap cap_net_admin,cap_net_raw+eip <путь к OneXrayCore>
+```
+
+Например для Debug:
+
+```shell
+sudo setcap cap_net_admin,cap_net_raw+eip build/linux/x64/debug/bundle/OneXrayCore
+```
+
+После пересборки, которая заменяет `OneXrayCore`, выдавайте возможности заново.
+Для ARM64 замените `x64` на `arm64`.
+
 [Вернуться к README](./README.ru.md)

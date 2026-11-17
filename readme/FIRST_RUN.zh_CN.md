@@ -135,4 +135,28 @@ FFI 头文件与配置见 `pubspec.yaml`；已入库的模型、数据库、资�
 普通 Debug 不需要 `BUILD_NUMBER`、Fastlane 或商店上传凭据；平台开发签名另行准备。
 打包时转到构建手册。
 
+## 5. 故障排除
+
+### Linux：`cap_net_admin / cap_net_raw are unavailable`
+
+启动 VPN 会话时出现此错误，说明 `OneXrayCore` 缺少网络能力。检查：
+
+```shell
+getcap <OneXrayCore 路径>
+```
+
+若无输出或 capabilities 不等于 `cap_net_admin,cap_net_raw+eip`，请授予：
+
+```shell
+sudo setcap cap_net_admin,cap_net_raw+eip <OneXrayCore 路径>
+```
+
+例如 Debug 版：
+
+```shell
+sudo setcap cap_net_admin,cap_net_raw+eip build/linux/x64/debug/bundle/OneXrayCore
+```
+
+重新构建替换 `OneXrayCore` 后需重新授予能力。ARM64 将 `x64` 替换为 `arm64`。
+
 [返回 README](./README.zh_CN.md)

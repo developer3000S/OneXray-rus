@@ -141,4 +141,31 @@ See [App](../docs/app.md), [Validation](../docs/validation.md) and
 Ordinary Debug does not need `BUILD_NUMBER`, Fastlane or store-upload credentials;
 platform development signing is separate. For packaging, use the build guide.
 
+## 5. Troubleshooting
+
+### Linux: `cap_net_admin / cap_net_raw are unavailable`
+
+The error appears when starting a VPN session if `OneXrayCore` lacks network
+capabilities. Check:
+
+```shell
+getcap <path to OneXrayCore>
+```
+
+If there is no output or capabilities are not
+`cap_net_admin,cap_net_raw+eip`, grant them:
+
+```shell
+sudo setcap cap_net_admin,cap_net_raw+eip <path to OneXrayCore>
+```
+
+For example, for Debug:
+
+```shell
+sudo setcap cap_net_admin,cap_net_raw+eip build/linux/x64/debug/bundle/OneXrayCore
+```
+
+After a rebuild that replaces `OneXrayCore`, grant the capabilities again. On
+ARM64 replace `x64` with `arm64`.
+
 [Back to README](../README.md)
